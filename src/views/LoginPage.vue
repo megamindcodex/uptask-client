@@ -1,0 +1,24 @@
+
+<script setup>
+import LoginForm from '@/components/auth/LoginForm.vue'
+</script>
+
+
+<template>
+  <div class="cont h-100 pa-2 d-flex flex-column ga-4">
+    <div class="w-100 d-flex flex-column">
+      <span class="text-h5">Sign In</span>
+      <span class="text-subtitle-1">Welcome back!, enter your details to login</span>
+    </div>
+    <LoginForm />
+  </div>
+</template>
+
+<style lang="css" scoped>
+.cont {
+  position: relative;
+  width: 100%;
+  margin-top: 100px;
+  /* border: 1px solid #000; */
+}
+</style>
