@@ -16,7 +16,7 @@ import ResetPasswordForm from '@/components/auth/ResetPasswordForm.vue'
 .cont {
   position: relative;
   width: 100%;
-  margin-top: 100px;
+  height: 100%;
   /* border: 1px solid #000; */
 }
 </style>

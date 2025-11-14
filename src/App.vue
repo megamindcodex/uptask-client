@@ -1,58 +1,79 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRoute } from 'vuetify/lib/composables/router'
+import { useUserStore } from './stores/userStore'
+import { useCollectionStore } from './stores/collectionStore'
+import { useTaskStore } from './stores/taskStore'
+
 import NavBar from './components/NavBar.vue'
 import FooterComp from './components/FooterComp.vue'
 import HeaderBar from './components/HeaderBar.vue'
-import AddTaskFrom from './components/AddTaskFrom.vue'
+import CreateNewCollectionFrom from './components/CreateNewCollectionFrom.vue'
+import AddNewTaskFrom from './components/AddNewTaskFrom.vue'
+
+const userStore = useUserStore()
+const { get_user_data } = useUserStore()
+
+const collectionStore = useCollectionStore()
+const { collectionDialog } = storeToRefs(collectionStore)
+const { toggle_create_collection_dialog } = useCollectionStore()
+
+const taskStore = useTaskStore()
+const { taskDialog } = storeToRefs(taskStore)
+const { show_task_dialog } = useTaskStore()
+
+const { userData } = storeToRefs(userStore)
+
+const route = useRoute()
 
 const drawer = ref(false)
-const dialog = ref(false)
+// const dialog = ref(false)
 
 const toggleNav = () => {
   drawer.value = !drawer.value
 }
 
-const showDialog = () => {
-  dialog.value = !dialog.value
-  console.log(dialog.value)
-}
+get_user_data()
+onMounted(async () => {
+  // console.log(userData.value)
+})
 </script>
 
 <template>
-  <v-app id="main" class="w-100">
-    <HeaderBar @toggle-nav="toggleNav()" @show-dialog="showDialog()" />
-    <RouterView></RouterView>
+  <v-app id="main">
+    <HeaderBar
+      @show-collection-dialog="toggle_create_collection_dialog()"
+      @toggle-nav="toggleNav()"
+      @show-task-dialog="show_task_dialog()"
+    />
     <v-navigation-drawer v-model="drawer" class="h-100 top-0">
       <NavBar />
     </v-navigation-drawer>
-
-    <v-dialog v-model="dialog">
-      <v-card max-width="400" max-height="400" class="pa-3 d-flex justify-center">
-        <AddTaskFrom @show-dialog="showDialog()" />
-      </v-card>
-    </v-dialog>
+    <div id="view">
+      <RouterView></RouterView>
+    </div>
 
     <!-- <button @click="toggleNav()">toggle</button> -->
-    <FooterComp />
+    <!-- <FooterComp v-if="route.name !== 'goal-task' && route.name !== 'goals'" /> -->
   </v-app>
 </template>
 
 <style lang="css" scoped>
-/* #main {
-  display: flex;
-  gap: 1rem;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+#main {
   width: 100%;
-} */
-
-.nav-drawer {
-  /* z-index: -1000; */
-  /* color: red; */
+  height: 100%;
+  /* background-color: red; */
+  /* margin-top: 100px; */
 }
 
-.v-navigation-drawer {
-  z-index: 1006;
+#view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background-color: green; */
+  margin-top: 100px;
 }
 </style>

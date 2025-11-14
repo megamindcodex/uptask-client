@@ -1,11 +1,16 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute } from 'vuetify/lib/composables/router'
+import { storeToRefs } from 'pinia'
 import { useNavigatorStore } from '@/stores/navigator'
+import { useUserStore } from '@/stores/userStore'
 
 import PorfileIcon from '@/assets/icons/PorfileIcon.vue'
 
 const route = useRoute()
+
+const userStore = useUserStore()
+const { userData } = storeToRefs(userStore)
 
 const navigatorStore = useNavigatorStore()
 const { navigateTo } = navigatorStore
@@ -42,10 +47,11 @@ const navOptions = ref([
           @click="navigateTo('/profile')"
           class="w-100 d-flex justify-center align-center"
           :class="[{ 'active-profile-nav-item': route.path === '/profile' }]"
+          v-ripple="{ class: 'text-black' }"
         >
           <PorfileIcon v-if="route.path === '/profile'" class="active-profile-icon" />
           <PorfileIcon v-else class="not-active-profile-icon" />
-          <v-list-item subtitle="sandra_a88@gmailcom" title="Sandra Adams"></v-list-item>
+          <v-list-item :title="userData.userName" :subtitle="userData.email"></v-list-item>
         </div>
       </v-list>
 
@@ -57,6 +63,7 @@ const navOptions = ref([
           :key="nav.key"
           class="nav-item pa-0 rounded-lg"
           :class="[{ 'active-nav-item': nav.path === route.path }]"
+          v-ripple="{ class: 'text-teal' }"
         >
           <div @click="navigateTo(`${nav.path}`)" class="pa-2">
             <span id="nav-txt" class="ml-5 pa-2">
@@ -97,11 +104,14 @@ const navOptions = ref([
 
 #nav-txt {
   font-size: 1.2rem;
+  font-weight: 600;
+  color: #086977;
 }
 
 .nav-item:hover {
   transition: 0.5s;
   /* border: 1px solid blue; */
+  /* background-color: #ffc93e; */
   background-color: #ffc93e;
 }
 

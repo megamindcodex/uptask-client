@@ -2,19 +2,26 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useValidator } from '@/composables/useValidator'
+import { useUserStore } from '@/stores/userStore'
+import { useCollectionStore } from '@/stores/collectionStore'
 import CancelIcon from '@/assets/icons/CancelIcon.vue'
 
-defineEmits(['showDialog'])
+// const { get_user_data } = useUserStore()
+
+// defineEmits(['showCollectionDialog'])
 
 const { validate_goal_title_field, validate_goal_description_field } = useValidator()
+
+const { toggle_create_collection_dialog, create_new_collection, get_all_task_collections } =
+  useCollectionStore()
 
 const formData = reactive({
   title: '',
   description: '',
 })
 
-const titleFieldeValidator = ref({ valid: true, error: false, message: '' })
-const descriptionFieldValidator = ref({ valid: false, error: false, message: '' })
+const titleFieldeValidator = ref({ valid: true, errorMsg: '' })
+const descriptionFieldValidator = ref({ valid: false, errorMsg: '' })
 
 const validateField = (field) => {
   if (field === 'title') {
@@ -33,14 +40,29 @@ const validateForm = () => {
   return titleFieldeValidator.value.valid && descriptionFieldValidator.value.valid
 }
 
-const add_task = () => {
+const run_create_new_collection = async () => {
   const isFormValid = validateForm()
-  console.log(`form valid is ${isFormValid}`)
+  if (isFormValid === false) {
+    console.log('Form is not valid')
+    return
+  }
+
+  const result = await create_new_collection(formData)
+  if (!result.success) {
+    console.log(result.message)
+    return
+  }
+
+  console.log(result.message)
+  await get_all_task_collections()
+  toggle_create_collection_dialog()
+  return
+  // console.log(`form valid is ${isFormValid}`)
 }
 </script>
 
 <template>
-  <v-form @submit.prevent="add_task" id="addTask-form" class="form">
+  <v-form @submit.prevent="run_create_new_collection" id="addCollection-form">
     <div class="w-100 d-flex justify-center align-center">
       <span id="h-text">Add New Goal</span>
       <!-- <CancelIcon @click="$emit('showDialog')" class="cancel-icon" /> -->
@@ -59,8 +81,8 @@ const add_task = () => {
       </div>
       <div class="input-details">
         <Transition name="input-error-fade">
-          <span v-if="titleFieldeValidator.error" class="text-error">{{
-            titleFieldeValidator.message
+          <span v-if="!titleFieldeValidator.valid" class="text-error">{{
+            titleFieldeValidator.errorMsg
           }}</span>
         </Transition>
       </div>
@@ -80,8 +102,8 @@ const add_task = () => {
       </div>
       <div class="input-details">
         <Transition name="input-error-fade">
-          <span v-if="descriptionFieldValidator.error" class="text-error">{{
-            descriptionFieldValidator.message
+          <span v-if="!descriptionFieldValidator.valid" class="text-error">{{
+            descriptionFieldValidator.errorMsg
           }}</span>
         </Transition>
       </div>
@@ -92,7 +114,7 @@ const add_task = () => {
         ><span>Add</span></v-btn
       >
       <v-btn
-        @click.prevent.stop="$emit('showDialog')"
+        @click.prevent.stop="toggle_create_collection_dialog()"
         class="rounded-md py-5"
         variant="outlined"
         block
@@ -103,13 +125,14 @@ const add_task = () => {
 </template>
 
 <style lang="css" scoped>
-.form {
+#addCollection-form {
   position: relative;
   width: 100%;
   display: flex;
   gap: 0.5rem;
   flex-direction: column;
   justify-content: center;
+  /* background-color: blue; */
   /* border: 1px solid blue; */
 }
 

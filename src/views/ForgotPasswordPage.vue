@@ -16,7 +16,8 @@ import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm.vue'
 .cont {
   position: relative;
   width: 100%;
-  margin-top: 100px;
+  height: 100%;
+  /* margin-top: 100px; */
   /* border: 1px solid #000; */
 }
 </style>

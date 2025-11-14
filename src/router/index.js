@@ -24,7 +24,13 @@ const router = createRouter({
       component: HomePage,
     },
     {
+      path: '/goals',
+      name: "goals",
+      component: GoalsPage
+    },
+    {
       path: '/goals/:id',
+      name: "goal-task",
       component: GoalTasksPage
     },
     {
@@ -42,10 +48,6 @@ const router = createRouter({
     {
       path: "/reset-password/:email",
       component: ResetPasswordPage
-    },
-    {
-      path: '/goals',
-      component: GoalsPage
     },
     {
       path: '/profile',

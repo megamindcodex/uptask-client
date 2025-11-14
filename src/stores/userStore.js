@@ -31,6 +31,7 @@ export const useUserStore = defineStore("userStore", () => {
             if (res.data.cookie === null) {
                 throw new Error("No cookie returned. but try Logging in now")
             }
+
             userData.value = res.data.newUser
 
 
@@ -60,7 +61,7 @@ export const useUserStore = defineStore("userStore", () => {
             }
 
 
-            userData.value = res.data.newUser
+            userData.value = res.data.user
 
             return { success: true, message: res.data.message }
         } catch (err) {
@@ -122,7 +123,7 @@ export const useUserStore = defineStore("userStore", () => {
             const res = await apiClient.post("/auth/reset-password", formData)
 
             if (res.status !== 200) {
-                throw new Error(res.data?.message || "Reset user passeord Failed")
+                throw new Error(res.data?.message || "Reset user password Failed")
             }
 
             return { success: true, message: res.data?.message }
@@ -132,6 +133,41 @@ export const useUserStore = defineStore("userStore", () => {
             return { success: false, message: msg }
         }
     }
+
+    // ******************** Get User data function****************//
+    const get_user_data = async () => {
+        try {
+            accessToken.value = await getCookie()
+            if (!accessToken.value) {
+                throw new Error("No access token in cookie")
+            }
+
+            const reqConfig = {
+                headers: {
+                    Authorization: `Bearer ${accessToken.value}`
+                }
+            }
+            const res = await apiClient.get("/api/get-user-data", reqConfig)
+
+            if (res.status !== 200) {
+                throw new Error(res.data.message || "Get user data Failed")
+            }
+
+            userData.value = res.data.user
+            // console.log(userData.value)
+            return { success: true, message: res.data.message }
+
+        } catch (err) {
+            const msg = err.response?.data?.message || err.message || "Unkown get_user_data error"
+            console.error(`get_user_data error: ${msg}`)
+            return { success: false, message: msg }
+        }
+    }
+
+
+
+
+
     return {
         userData,
 
@@ -139,6 +175,8 @@ export const useUserStore = defineStore("userStore", () => {
         loginUser,
         request_resetCode,
         verify_resetCode,
-        reset_user_password
+        reset_user_password,
+
+        get_user_data
     }
 })

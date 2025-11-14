@@ -1,17 +1,10 @@
 <template>
-  <svg
-    class="feather feather-x"
-    fill="none"
-    height="24"
-    width="24"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    stroke-width="2"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <line x1="18" x2="6" y1="6" y2="18" />
-    <line x1="6" x2="18" y1="6" y2="18" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+    <path
+      fill-rule="evenodd"
+      d="M12.035 13.096a6.5 6.5 0 0 1-9.131-9.131l9.131 9.131Zm1.061-1.06L3.965 2.903a6.5 6.5 0 0 1 9.131 9.131ZM16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0Z"
+      clip-rule="evenodd"
+    />
   </svg>
 </template>
 
