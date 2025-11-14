@@ -10,11 +10,15 @@ import EditTaskFrom from '@/components/EditTaskFrom.vue'
 
 import AddFileIcon from '@/assets/icons/AddFileIcon.vue'
 import DotMenuIcon from '@/assets/icons/DotOptioncon.vue'
+import ChevronLeftIcone from '@/assets/icons/ChevronLeftIcone.vue'
+import ChevronRightIcon from '@/assets/icons/ChevronRightIcon.vue'
+import ArrowLeftIcon from '@/assets/icons/ArrowLeftIcon.vue'
 import SolidCompleteIcon from '@/assets/icons/SolidCompleteIcon.vue'
 import CompleteIcon from '@/assets/icons/CompleteIcon.vue'
 import EditIcon from '@/assets/icons/EditIcon.vue'
 import TrashIcon from '@/assets/icons/TrashIcon.vue'
 import CancelIcon from '@/assets/icons/CancelIcon.vue'
+import TickIcon from '@/assets/icons/TickIcon.vue'
 
 const route = useRoute()
 const collectionId = ref(route.value.params.id)
@@ -89,7 +93,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <div id="cont" class="">
+  <div id="cont">
     <!-- Sub Header for goal title and goal description -->
     <div id="sub-head" class="px-2">
       <div id="goal-title">
@@ -101,14 +105,24 @@ onMounted(async () => {
     </div>
     <div v-if="tasks.length" class="wrapper px-2">
       <div class="task-item" v-for="task in tasks" :key="task._id">
+        <TickIcon id="tick-icon" v-show="task.tick && task._id !== selected" />
         <div id="row-1">
           <div id="content" class="text-subtitle-1 font-weight-bold">{{ task.content }}</div>
           <DotMenuIcon
+            id="dot-option-icon"
             v-if="selected !== task._id"
-            class="dot-option-icon"
             @click="selectTask(task._id)"
           />
-          <!-- <CompleteSolidIcon id="complete-solid-icon" /> -->
+          <!-- <ChevronLeftIcone
+            id="chevronLeft-icon"
+            v-if="selected !== task._id"
+            @click="selectTask(task._id)"
+          /> -->
+          <!-- <ArrowLeftIcon
+            id="ArrowLeft-icon"
+            v-if="selected !== task._id"
+            @click="selectTask(task._id)"
+          /> -->
         </div>
         <transition name="grow-fade">
           <div id="row-2" v-show="task._id === selected">
@@ -140,8 +154,13 @@ onMounted(async () => {
             >
               <TrashIcon id="trash-icon" />
             </span>
-            <span id="cancel-btn" v-ripple="{ class: 'text-black' }" @click="cancel(task._id)">
-              <CancelIcon id="cancel-icon" />
+            <span
+              id="chevronRight-btn"
+              v-ripple="{ class: 'text-black' }"
+              @click="cancel(task._id)"
+            >
+              <!-- <CancelIcon id="cancel-icon" /> -->
+              <ChevronRightIcon id="chevronRight-icon" />
             </span>
           </div>
         </transition>
@@ -187,13 +206,17 @@ onMounted(async () => {
 
   <!-- Delete Collection -->
   <v-dialog id="delete-task-dialog" v-model="taskDeleteDialog">
-    <v-card class="card w-100 pa-4 ga-4">
+    <v-card id="del-dialog" class="card w-100 pa-4 ga-4 rounded-xl">
       <div class="w-100 d-flex flex-column align-center justify-center">
         <v-card-title>Delete this task?</v-card-title>
       </div>
       <div class="w-100 d-flex ga-2 align-center justify-space-between">
-        <v-btn class="w-50" @click="run_delet_task()">confirm</v-btn>
-        <v-btn class="w-50" @click="toggle_task_delete_dialog()">cancel</v-btn>
+        <v-btn variant="tonal" class="w-50 text-red rounded-lg" @click="run_delet_task()"
+          >delete</v-btn
+        >
+        <v-btn variant="outlined" class="w-50 rounded-lg" @click="toggle_task_delete_dialog()"
+          >cancel</v-btn
+        >
       </div>
     </v-card>
   </v-dialog>
@@ -270,11 +293,51 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   border: 1px solid #554008;
+  /* border: 3px solid #ffc93e; */
   padding: 0.6rem;
-  border-radius: 12px 5px 12px 5px;
+  /* border-radius: 12px 5px 12px 5px; */
+  border-radius: 12px;
   color: #2f4858;
-  background-color: #ffc93e;
+  /* background-color: #ffc93e; */
+  /* color: #fff; */
+  /* background-color: green; */
   overflow-x: scroll;
+}
+
+#dot-option-icon {
+  top: 0;
+  right: 5px;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+}
+
+#chevronLeft-icon {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  width: 25px;
+  height: 25px;
+}
+
+#ArrowLeft-icon {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  width: 25px;
+  height: 25px;
+}
+
+#tick-icon {
+  position: absolute;
+  width: 27px;
+  height: 27px;
+  bottom: -15px;
+  right: -3px;
+  z-index: 1;
+  /* fill: green; */
+  stroke: green;
+  stroke-width: 3px;
 }
 
 #content {
@@ -305,7 +368,7 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 0px 0px 0px 0px;
+  /* border-radius: 0px 0px 0px 0px; */
 }
 
 #delete-btn {
@@ -313,16 +376,15 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 0px 0px 0px 0px;
+  /* border-radius: 0px 0px 0px 0px; */
 }
 
-#cancel-btn {
+#chevronRight-btn {
   /* width: 50%; */
-  /* padding: 5px; */
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 0px 5px 12px 0px;
+  /* border-radius: 0px 5px 12px 0px; */
 }
 
 #add-box {
@@ -349,44 +411,44 @@ onMounted(async () => {
   color: #086977;
 }
 
-.dot-option-icon {
-  top: 0;
-  right: 5px;
-  width: 40px;
-  height: 40px;
-  position: absolute;
-}
-
 #row-2 span {
   padding-left: 3px;
   padding-right: 3px;
 }
 
 #edit-icon {
-  width: 30px;
-  height: 30px;
-  fill: #086977;
+  width: 20px;
+  height: 20px;
+  /* fill: #086977; */
+  fill: currentColor;
 }
 
 .complete-icon {
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   fill: gray;
   stroke-width: 10px;
 }
 
 .solid-complete-icon {
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   fill: green;
   /* stroke: green; */
 }
 
 #trash-icon {
+  width: 24px;
+  height: 24px;
+  /* stroke:; */
+  fill: currentColor;
+}
+
+#chevronRight-icon {
   width: 30px;
   height: 30px;
-  stroke: red;
-  fill: red;
+  position: relative;
+  stroke: currentColor;
 }
 
 #cancel-icon {
@@ -397,6 +459,11 @@ onMounted(async () => {
   height: 26px;
 }
 
+#del-dialog {
+  position: relative;
+  top: 150px;
+}
+
 .checked-complete-solid-icon {
   fill: green;
 }
@@ -405,7 +472,7 @@ onMounted(async () => {
 }
 
 .grow-fade-enter-active {
-  transition: width 0.3s ease, opacity;
+  transition: width 0.3s ease;
 }
 
 .grow-fade-enter-from,

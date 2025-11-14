@@ -95,14 +95,24 @@ onMounted(async () => {
     </v-dialog>
 
     <!-- Delete Collection -->
-    <v-dialog id="delete-task-dialog" v-model="deleteDialog">
-      <v-card class="card w-100 pa-4 ga-4">
+    <v-dialog id="delete-collection-dialog" v-model="deleteDialog">
+      <v-card id="del-dialog" class="card w-100 pa-4 ga-4 rounded-xl">
         <div class="w-100 d-flex flex-column align-center justify-center">
-          <v-card-title>Delete this task goal?</v-card-title>
+          <v-card-title>Delete this Goal?</v-card-title>
         </div>
         <div class="w-100 d-flex ga-2 align-center justify-space-between">
-          <v-btn class="w-50" @click="run_delete_collection(toBeDeletedId)">confirm</v-btn>
-          <v-btn class="w-50" @click="toggle_collection_delete_dialog()">cancel</v-btn>
+          <v-btn
+            variant="tonal"
+            class="w-50 text-red rounded-lg"
+            @click="run_delete_collection(toBeDeletedId)"
+            >delete</v-btn
+          >
+          <v-btn
+            variant="outlined"
+            class="w-50 rounded-lg"
+            @click="toggle_collection_delete_dialog()"
+            >cancel</v-btn
+          >
         </div>
       </v-card>
     </v-dialog>
@@ -150,5 +160,10 @@ onMounted(async () => {
 .add-icon {
   width: 100px;
   height: 100px;
+}
+
+#del-dialog {
+  position: relative;
+  top: 150px;
 }
 </style>

@@ -98,6 +98,8 @@ onMounted(async () => {
 #sub-title {
   font-size: 1rem;
   color: #2f4858;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #col-2 {
@@ -133,9 +135,10 @@ onMounted(async () => {
 }
 
 #edit-icon {
-  width: 27px;
-  height: 27px;
+  width: 20px;
+  height: 20px;
   fill: #086977;
+  /* fill: currentColor; */
   cursor: pointer;
 }
 
@@ -143,7 +146,7 @@ onMounted(async () => {
   position: relative;
   width: 27px;
   height: 27px;
-  fill: red;
+  fill: currentColor;
 }
 
 .txt-complete {
@@ -159,7 +162,8 @@ onMounted(async () => {
   /* stroke-width: 20px; */
 }
 
-#delete-task-dialog {
-  color: #c6ddec57;
+#del-dialog {
+  position: relative;
+  top: 150px;
 }
 </style>
