@@ -14,12 +14,14 @@ const route = useRoute()
 
 const taskStore = useTaskStore()
 const { taskToEdit } = storeToRefs(taskStore)
-const { toggle_edit_task_dialog, get_all_task_in_collection, edit_task } = useTaskStore()
+const { toggle_edit_task_dialog, get_all_task_in_collection, edit_task, selectTask } =
+  useTaskStore()
 
 defineEmits(['showTaskDialog'])
 
 // const { validate_goal_title_field, validate_goal_description_field } = useValidator()
 
+const isLoading = ref(false)
 const formData = ref({
   newContent: taskToEdit.value.content || '',
   newNote: taskToEdit.value.note || '',
@@ -72,7 +74,9 @@ const run_edit_new_task = async () => {
 
   console.log('form valid is', isFormValid)
 
+  isLoading.value = true
   const result = await edit_task(formData.value, collectionId.value, taskId.value)
+  isLoading.value = false
   if (!result.success) {
     console.log(result.message)
     return
@@ -81,6 +85,7 @@ const run_edit_new_task = async () => {
   console.log(result.message)
 
   await get_all_task_in_collection(collectionId.value)
+  selectTask()
   toggle_edit_task_dialog()
   return
 }
@@ -137,9 +142,10 @@ const run_edit_new_task = async () => {
     </div>
 
     <div class="w-100 btn d-flex ga-5 flex-column justify-space-around">
-      <v-btn type="submit" id="add-btn" class="rounded-md py-5" variant="tonal" block
-        ><span>Update</span></v-btn
-      >
+      <v-btn type="submit" id="add-btn" class="rounded-md py-5" variant="tonal" block>
+        <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
+        <span v-if="!isLoading">Update</span>
+      </v-btn>
       <v-btn
         @click.prevent.stop="toggle_edit_task_dialog()"
         class="rounded-md py-5"

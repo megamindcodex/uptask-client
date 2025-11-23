@@ -4,7 +4,11 @@ import { reactive, ref } from 'vue'
 import { useValidator } from '@/composables/useValidator'
 import { useUserStore } from '@/stores/userStore'
 import { useCollectionStore } from '@/stores/collectionStore'
+import { useAlertStore } from '@/stores/alertStore'
+
 import CancelIcon from '@/assets/icons/CancelIcon.vue'
+
+const { toggle_alert } = useAlertStore()
 
 // const { get_user_data } = useUserStore()
 
@@ -15,6 +19,7 @@ const { validate_goal_title_field, validate_goal_description_field } = useValida
 const { toggle_create_collection_dialog, create_new_collection, get_all_task_collections } =
   useCollectionStore()
 
+const isLoading = ref(false)
 const formData = reactive({
   title: '',
   description: '',
@@ -47,12 +52,16 @@ const run_create_new_collection = async () => {
     return
   }
 
+  isLoading.value = true
   const result = await create_new_collection(formData)
+  isLoading.value = false
   if (!result.success) {
+    toggle_alert({ type: 'error', text: result.message })
     console.log(result.message)
     return
   }
 
+  toggle_alert({ type: 'success', text: result.message })
   console.log(result.message)
   await get_all_task_collections()
   toggle_create_collection_dialog()
@@ -110,9 +119,10 @@ const run_create_new_collection = async () => {
     </div>
 
     <div class="w-100 btn d-flex ga-5 flex-column justify-space-around">
-      <v-btn type="submit" id="add-btn" class="rounded-md py-5" variant="tonal" block
-        ><span>Add</span></v-btn
-      >
+      <v-btn type="submit" id="add-btn" class="rounded-md py-5" variant="tonal" block>
+        <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
+        <span v-if="!isLoading">Add</span>
+      </v-btn>
       <v-btn
         @click.prevent.stop="toggle_create_collection_dialog()"
         class="rounded-md py-5"

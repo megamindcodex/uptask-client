@@ -7,6 +7,10 @@ import { useRouter } from 'vuetify/lib/composables/router'
 import { useValidator } from '@/composables/useValidator' //custom form validator composables
 import { useUserStore } from '@/stores/userStore'
 
+import { useAlertStore } from '@/stores/alertStore'
+
+const { toggle_alert } = useAlertStore()
+
 const router = useRouter()
 const userStore = useUserStore()
 
@@ -22,6 +26,8 @@ const {
 } = useValidator()
 
 const alert = ref({ type: '', message: '' })
+
+const isLoading = ref(false)
 const formData = reactive({
   userName: '',
   email: '',
@@ -79,7 +85,9 @@ const submitForm = async () => {
     return
   }
 
+  isLoading.value = true
   const result = await registerUser(formData)
+  isLoading.value = false
 
   if (!result.success) {
     console.log(result.message)
@@ -87,11 +95,12 @@ const submitForm = async () => {
     return // return to the caller so it does not continue with the next function in line/it just stops
   }
 
-  alert.value = { type: 'success', message: result.message }
+  toggle_alert({ type: 'success', text: result.message })
+  // alert.value = { type: 'success', message: result.message }
   console.log(`form is valid: ${isFormValid}`)
 
   console.log(`submited: ${result.message}`)
-  router.push('/profile')
+  router.push('/goals')
 }
 </script>
 
@@ -200,7 +209,8 @@ const submitForm = async () => {
 
     <div class="btn-cont mt-2">
       <v-btn type="submit" variant="tonal" class="btn py-6" block>
-        <span>sign up</span>
+        <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
+        <span v-if="!isLoading">sign up</span>
       </v-btn>
     </div>
 

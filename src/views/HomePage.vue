@@ -1,21 +1,17 @@
 
 <script setup>
+import HeroSection from '@/components/Home/HeroSection.vue'
+import FeatureSection from '@/components/Home/FeatureSection.vue'
+import HowItWorksSection from '@/components/Home/HowItWorksSection.vue'
+import TestimonialSection from '@/components/Home/TestimonialSection.vue'
 </script>
 <template>
-  <div class="cont">
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-    <h1>Home Page</h1>
-  </div>
+  <v-container class="d-flex flex-column ga-10 pa-0">
+    <HeroSection />
+    <FeatureSection />
+    <HowItWorksSection />
+    <!-- <TestimonialSection /> -->
+  </v-container>
 </template>
 
 <style lang="css" scoped>

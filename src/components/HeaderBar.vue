@@ -4,9 +4,14 @@ import { ref } from 'vue'
 import { useRoute } from 'vuetify/lib/composables/router'
 import { useNavigatorStore } from '@/stores/navigator'
 import { useTaskStore } from '@/stores/taskStore'
+import { useAuthStore } from '@/stores/AuthStore'
 
 import MenuIcon from '@/assets/icons/MenuIcon.vue'
 import PlusIcon from '@/assets/icons/PlusIcon.vue'
+import { storeToRefs } from 'pinia'
+
+const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
 
 const taskStore = useTaskStore()
 const { toggle_add_task_dialog } = useTaskStore()
@@ -36,6 +41,23 @@ defineEmits(['showCollectionDialog', 'toggleNav'])
       <div v-if="route.name === 'goal-task'" class="d-flex align-center">
         <PlusIcon @click="toggle_add_task_dialog()" class="plus-svg" />
       </div>
+
+      <div
+        id="login"
+        v-if="!isAuthenticated && route.path !== '/login'"
+        @click="navigateTo('/login')"
+      >
+        <span>Log-In</span>
+      </div>
+      <div
+        id="login"
+        v-if="!isAuthenticated && route.path === '/login'"
+        @click="navigateTo('/signup')"
+      >
+        <span>Sign-Up</span>
+      </div>
+
+      <!-- <div id="likes"></div> -->
     </div>
   </v-app-bar>
 </template>
@@ -59,6 +81,29 @@ defineEmits(['showCollectionDialog', 'toggleNav'])
 }
 
 .plus-svg {
+  color: #086977;
+}
+
+#login {
+  display: flex;
+  justify-content: center;
+  border: 2px solid #086977;
+  border-radius: 20px;
+  transition: 0.3s ease-in-out;
+}
+
+#login:hover {
+  translate: -5px;
+  scale: 1.03;
+  transition: 0.3s ease-in-out;
+  /* box-shadow: 0px 0px 5px 2px #086977; */
+  /* border: transparent; */
+}
+
+#login span {
+  padding: 5px 20px;
+  text-align: center;
+  font-weight: bold;
   color: #086977;
 }
 </style>

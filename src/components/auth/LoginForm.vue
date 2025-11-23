@@ -3,8 +3,14 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vuetify/lib/composables/router'
 import { useUserStore } from '@/stores/userStore'
+import { useAuthStore } from '@/stores/AuthStore'
 
 import { useValidator } from '@/composables/useValidator' //custom form validator composables
+import { useAlertStore } from '@/stores/alertStore'
+
+const { checkAuth } = useAuthStore()
+
+const { toggle_alert } = useAlertStore()
 
 const router = useRouter()
 
@@ -13,6 +19,7 @@ const { validate_email_field, validate_password_field } = useValidator()
 const userStore = useUserStore()
 const { loginUser } = useUserStore()
 
+const isLoading = ref(false)
 const alert = ref({ type: '', message: '' })
 const formData = reactive({
   email: '',
@@ -48,18 +55,22 @@ const submitForm = async () => {
     return
   }
 
+  isLoading.value = true
+
   const result = await loginUser(formData)
+  isLoading.value = false
   if (!result.success) {
     console.log(result.message)
     alert.value = { type: 'error', message: result.message }
     return // return to the caller so it does not continue with the next function in line/it just stops
   }
 
-  alert.value = { type: 'success', message: result.message }
+  toggle_alert({ type: 'success', text: result.message })
   console.log(`form is valid: ${isFormValid}`)
 
   console.log(`submited: ${result.message}`)
-  router.push('/profile')
+  await checkAuth()
+  router.push('/goals')
 }
 </script>
 
@@ -130,7 +141,8 @@ const submitForm = async () => {
 
     <div class="btn-cont mt-5">
       <v-btn type="submit" variant="tonal" class="btn py-6" block>
-        <span>Log in</span>
+        <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
+        <span v-if="!isLoading">Log in</span>
       </v-btn>
     </div>
     <div class="base w-100 d-flex ga-2 justify-center align-center mt-2">

@@ -2,8 +2,12 @@ import { defineStore, storeToRefs } from "pinia";
 import apiClient from "@/api/axiosConfig";
 import { computed, ref } from "vue";
 import { useCookie } from "@/composables/useCookie";
+import { useAlertStore } from "./alertStore";
 import { useCollectionStore } from "./collectionStore";
 export const useTaskStore = defineStore("taskStore", () => {
+
+    const { toggle_alert } = useAlertStore()
+
     const collectionStore = useCollectionStore()
     const { taskCollections } = storeToRefs(collectionStore)
     const { get_all_task_collections } = useCollectionStore()
@@ -24,6 +28,22 @@ export const useTaskStore = defineStore("taskStore", () => {
 
 
 
+    const selectedTask = ref('')
+    // this function is meant to take the task id for each individual task when each individual task is clicked amd then attatch it to the "selected variable"
+    const selectTask = (taskId) => {
+        // console.log(taskId)
+        if (taskId === null || taskId === '') {
+            selectedTask.value = null
+            return
+        }
+
+        selectedTask.value = taskId
+        return
+    }
+
+    // const cancel_selectedTask = () => {
+    //     selectedTask.value = ''
+    // }
 
 
 
@@ -40,13 +60,16 @@ export const useTaskStore = defineStore("taskStore", () => {
                 note: data.note,
                 taskId: data._id,
             }
+            // asign task id to "selectedTask" variable above
+            selectedTask.value = data._id
             editTaskDisplay.value = true
-            console.log(taskToEdit.value)
+            // console.log(taskToEdit.value)
             return
         }
 
         editTaskDisplay.value = !editTaskDisplay.value
         taskToEdit.value = null
+        selectTask()
         // console.log(`edit dialog is: ${editTaskDisplay.value}`)
         return
     }
@@ -86,10 +109,13 @@ export const useTaskStore = defineStore("taskStore", () => {
                 throw new Error(res.data.message || "add_new_ task Failed")
             }
 
+
+            // toggle_alert({ type: "success", text: "New task added!" })
             return { success: true, message: res.data.message }
 
         } catch (err) {
             const msg = err.response.data.message || err.message || "Unkown add_new_task error"
+            // toggle_alert({ type: "error", text: msg })
             return { success: false, message: msg }
         }
     }
@@ -177,10 +203,13 @@ export const useTaskStore = defineStore("taskStore", () => {
             if (res.status !== 200) {
                 throw new Error(res.data.message || "edit_task Failed")
             }
+
+            toggle_alert({ type: "success", text: `${res.data.message}!` })
             return { success: true, message: res.data.message }
 
         } catch (err) {
             const msg = err?.response?.data?.message || err.message || "Unkown edit_task error"
+            toggle_alert({ type: "error", text: msg })
             return { success: false, message: msg }
         }
     }
@@ -242,9 +271,11 @@ export const useTaskStore = defineStore("taskStore", () => {
             if (res.status !== 200) {
                 throw new Error(res.data.message || "Delete task Failed")
             }
+
+            // toggle_alert({ type: "success", text: `${res.data.message}!` })
             return { success: true, message: res.data.message }
         } catch (err) {
-            const msg = err.response.data.message || err.message || "Unkown delete_task error"
+            const msg = err?.response?.data?.message || err.message || "Unkown delete_task error"
             return { success: false, message: msg }
         }
 
@@ -263,11 +294,14 @@ export const useTaskStore = defineStore("taskStore", () => {
         goalDescription,
         collection,
         tasks,
+        selectedTask,
 
 
         toggle_add_task_dialog,
         toggle_edit_task_dialog,
         toggle_task_delete_dialog,
+
+        selectTask,
 
         add_new_task,
         get_all_task_in_collection,

@@ -2,6 +2,7 @@
 <script setup>
 import { useRoute } from 'vuetify/lib/composables/router'
 import { useTaskStore } from '@/stores/taskStore'
+import { useAlertStore } from '@/stores/alertStore'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
 
@@ -23,6 +24,8 @@ import TickIcon from '@/assets/icons/TickIcon.vue'
 const route = useRoute()
 const collectionId = ref(route.value.params.id)
 
+const { toggle_alert } = useAlertStore()
+
 const taskStore = useTaskStore()
 const {
   taskDialog,
@@ -32,11 +35,15 @@ const {
   goalDescription,
   taskDeleteDialog,
   taskToBeDeletedId,
+  selectedTask,
 } = storeToRefs(taskStore)
 const {
   toggle_add_task_dialog,
   toggle_edit_task_dialog,
   toggle_task_delete_dialog,
+
+  selectTask,
+  cancel_selectedTask,
 
   get_all_task_in_collection,
   toggle_task_tick,
@@ -44,43 +51,41 @@ const {
 } = useTaskStore()
 
 // const toBeDeleted = []
-const selected = ref('')
 
-const selectTask = (taskId) => {
-  // console.log(taskId)
-  if (taskId === null || taskId === '') {
-    selected.value = null
-    return
-  }
-
-  selected.value = taskId
-}
-
-const cancel = (taskId) => {
-  selected.value = ''
-  console.log(`cancel button clicked for task with id: ${taskId}`)
-}
+const isLoadingDelete = ref(false)
+const isLoadingcheckTask = ref(false)
 
 const run_delet_task = async () => {
+  isLoadingDelete.value = true
   const result = await delete_task(taskToBeDeletedId.value, collectionId.value)
+  isLoadingDelete.value = false
   if (!result.success) {
+    isLoadingDelete.value = false
+    toggle_alert({ type: 'error', text: `${result.message}!` })
     console.log(result.message)
     return
   }
 
   console.log(result.message)
+  toggle_alert({ type: 'success', text: `${result.message}!` })
+
   toggle_task_delete_dialog()
   await get_all_task_in_collection(collectionId.value)
+  return
 }
 
 const run_toggle_task_tick = async (taskId) => {
+  isLoadingcheckTask.value = true
   const result = await toggle_task_tick(taskId, collectionId.value)
+  isLoadingcheckTask.value = false
 
   if (!result.success) {
+    toggle_alert({ type: 'error', text: result.message })
     console.log(result.message)
     return
   }
 
+  toggle_alert({ type: 'info', text: 'Checked' })
   await get_all_task_in_collection(collectionId.value)
   selectTask()
   console.log(result.message)
@@ -105,12 +110,12 @@ onMounted(async () => {
     </div>
     <div v-if="tasks.length" class="wrapper px-2">
       <div class="task-item" v-for="task in tasks" :key="task._id">
-        <TickIcon id="tick-icon" v-show="task.tick && task._id !== selected" />
+        <TickIcon id="tick-icon" v-show="task.tick && task._id !== selectedTask" />
         <div id="row-1">
           <div id="content" class="text-subtitle-1 font-weight-bold">{{ task.content }}</div>
           <DotMenuIcon
             id="dot-option-icon"
-            v-if="selected !== task._id"
+            v-if="selectedTask !== task._id"
             @click="selectTask(task._id)"
           />
           <!-- <ChevronLeftIcone
@@ -125,15 +130,23 @@ onMounted(async () => {
           /> -->
         </div>
         <transition name="grow-fade">
-          <div id="row-2" v-show="task._id === selected">
-            <span id="check-btn" v-if="!task.tick">
+          <div id="row-2" v-show="task._id === selectedTask">
+            <v-progress-circular
+              v-if="isLoadingcheckTask"
+              size="25"
+              color="green"
+              indeterminate
+            ></v-progress-circular>
+            <span id="check-btn" v-if="!task.tick && !isLoadingcheckTask">
+              <!-- this shows when the an individual task is unchecked -->
               <CompleteIcon
                 id="complete-icon"
                 class="complete-icon"
                 @click="run_toggle_task_tick(task._id)"
               />
             </span>
-            <span id="check-solid-btn" v-if="task.tick">
+            <span id="check-solid-btn" v-if="task.tick && !isLoadingcheckTask">
+              <!-- this shows when the an individual task is checked -->
               <SolidCompleteIcon
                 id="solid-complete-icon"
                 class="solid-complete-icon"
@@ -154,11 +167,7 @@ onMounted(async () => {
             >
               <TrashIcon id="trash-icon" />
             </span>
-            <span
-              id="chevronRight-btn"
-              v-ripple="{ class: 'text-black' }"
-              @click="cancel(task._id)"
-            >
+            <span id="chevronRight-btn" v-ripple="{ class: 'text-black' }" @click="selectTask()">
               <!-- <CancelIcon id="cancel-icon" /> -->
               <ChevronRightIcon id="chevronRight-icon" />
             </span>
@@ -180,7 +189,7 @@ onMounted(async () => {
   </div>
 
   <!--Dailog for adding new task in user task collection -->
-  <v-dialog v-model="taskDialog" class="d-flex justify-center align-center">
+  <v-dialog persistent v-model="taskDialog" class="d-flex justify-center align-center">
     <div class="overLay-child">
       <v-card
         max-width="400"
@@ -194,7 +203,7 @@ onMounted(async () => {
   </v-dialog>
 
   <!-- Edit Collection Dialog -->
-  <v-dialog v-model="editTaskDisplay" class="d-flex justify-center align-center">
+  <v-dialog persistent v-model="editTaskDisplay" class="d-flex justify-center align-center">
     <v-card
       max-width="400"
       max-height="400"
@@ -205,15 +214,17 @@ onMounted(async () => {
   </v-dialog>
 
   <!-- Delete Collection -->
-  <v-dialog id="delete-task-dialog" v-model="taskDeleteDialog">
+  <v-dialog persistent id="delete-task-dialog" v-model="taskDeleteDialog">
     <v-card id="del-dialog" class="card w-100 pa-4 ga-4 rounded-xl">
       <div class="w-100 d-flex flex-column align-center justify-center">
         <v-card-title>Delete this task?</v-card-title>
       </div>
       <div class="w-100 d-flex ga-2 align-center justify-space-between">
-        <v-btn variant="tonal" class="w-50 text-red rounded-lg" @click="run_delet_task()"
-          >delete</v-btn
-        >
+        <v-btn variant="tonal" class="w-50 text-red rounded-lg" @click="run_delet_task()">
+          <v-progress-circular v-if="isLoadingDelete" indeterminate></v-progress-circular>
+
+          <span v-if="!isLoadingDelete"> delete </span>
+        </v-btn>
         <v-btn variant="outlined" class="w-50 rounded-lg" @click="toggle_task_delete_dialog()"
           >cancel</v-btn
         >

@@ -3,6 +3,10 @@
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useCollectionStore } from '@/stores/collectionStore'
+import { useAlertStore } from '@/stores/alertStore'
+
+// const alertStore = useAlertStore()
+const { toggle_alert } = useAlertStore()
 
 const collectionStore = useCollectionStore()
 const { collectionToEdit } = storeToRefs(collectionStore)
@@ -10,19 +14,24 @@ const { toggle_Edit_collection_dialog, get_all_task_collections, edit_collection
   useCollectionStore()
 // console.log('props in edit collection form:', props)
 
+const isLoading = ref(false)
 const formData = ref({
   newTitle: collectionToEdit.value.title,
   newDescription: collectionToEdit.value.description,
 })
 
-const run_create_new_collection = async () => {
+const run_edit_collection = async () => {
+  isLoading.value = true
   const result = await edit_collection(formData.value)
+  isLoading.value = false
   if (!result.success) {
     console.log(result.message)
+    toggle_alert({ type: 'error', text: result.message })
     return
   }
 
   console.log(result.message)
+  toggle_alert({ type: 'success', text: result.message })
   await get_all_task_collections()
   toggle_Edit_collection_dialog()
   return
@@ -31,7 +40,7 @@ const run_create_new_collection = async () => {
 </script>
 
 <template>
-  <v-form @submit.prevent="run_create_new_collection" id="EditCollection-form">
+  <v-form @submit.prevent="run_edit_collection" id="EditCollection-form">
     <div class="w-100 d-flex justify-center align-center">
       <span id="h-text">Edit Goal</span>
       <!-- <CancelIcon @click="$emit('showDialog')" class="cancel-icon" /> -->
@@ -79,9 +88,10 @@ const run_create_new_collection = async () => {
     </div>
 
     <div class="w-100 btn d-flex ga-5 flex-column justify-space-around">
-      <v-btn type="submit" id="add-btn" class="rounded-md py-5" variant="tonal" block
-        ><span>update</span></v-btn
-      >
+      <v-btn type="submit" id="add-btn" class="rounded-md py-5" variant="tonal" block>
+        <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
+        <span v-if="!isLoading">update</span>
+      </v-btn>
       <v-btn
         @click.prevent.stop="toggle_Edit_collection_dialog()"
         class="rounded-md py-5"

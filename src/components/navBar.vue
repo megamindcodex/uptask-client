@@ -1,11 +1,31 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vuetify/lib/composables/router'
 import { storeToRefs } from 'pinia'
 import { useNavigatorStore } from '@/stores/navigator'
 import { useUserStore } from '@/stores/userStore'
+import { useAuthStore } from '@/stores/AuthStore'
 
 import PorfileIcon from '@/assets/icons/PorfileIcon.vue'
+
+import { useCookie } from '@/composables/useCookie'
+// import TrashIconVue from '@/assets/icons/TrashIcon.vue'
+
+const { getCookie } = useCookie()
+
+const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
+
+const checkIfAuthenticated = async () => {
+  const accessToken = await getCookie()
+  if (accessToken === '' || accessToken === null) {
+    isAuthenticated.value = false
+    return
+  }
+
+  isAuthenticated.value = true
+  return
+}
 
 const route = useRoute()
 
@@ -37,12 +57,17 @@ const navOptions = ref([
     path: '/about',
   },
 ])
+
+onMounted(async () => {
+  await checkIfAuthenticated()
+  console.log(isAuthenticated.value)
+})
 </script>
 
 <template>
   <div id="nav-cont" class="">
     <div id="nav">
-      <v-list class="w-100 border-b-md d-flex align-center pa-2">
+      <v-list v-if="isAuthenticated" class="w-100 border-b-md d-flex align-center pa-2">
         <div
           @click="navigateTo('/profile')"
           class="w-100 d-flex justify-center align-center"
@@ -58,19 +83,29 @@ const navOptions = ref([
       <v-divider></v-divider>
       <!--I do not even know what the hel this is "nav". but somehow is adds a padding around the v-list component-->
       <v-list class="w-100 d-flex flex-column ga-2" nav>
-        <v-list-item
-          v-for="nav in navOptions"
-          :key="nav.key"
-          class="nav-item pa-0 rounded-lg"
-          :class="[{ 'active-nav-item': nav.path === route.path }]"
-          v-ripple="{ class: 'text-teal' }"
-        >
-          <div @click="navigateTo(`${nav.path}`)" class="pa-2">
-            <span id="nav-txt" class="ml-5 pa-2">
-              {{ nav.name }}
-            </span>
+        <div v-for="nav in navOptions" :key="nav.key">
+          <div
+            v-if="
+              (isAuthenticated && nav.name === 'Home') ||
+              (isAuthenticated && nav.name === 'About') ||
+              (isAuthenticated && nav.name === 'Goals') ||
+              (!isAuthenticated && nav.name === 'Home') ||
+              (!isAuthenticated && nav.name === 'About') ||
+              (!isAuthenticated && nav.name === 'Login') ||
+              (!isAuthenticated && nav.name === 'Sign-Up')
+            "
+            class="nav-item pa-0 rounded-lg pa-2"
+            :class="[{ 'active-nav-item': nav.path === route.path }]"
+            v-ripple="{ class: 'text-teal' }"
+            @click="navigateTo(`${nav.path}`)"
+          >
+            <div>
+              <span id="nav-txt" class="ml-5 pa-2">
+                {{ nav.name }}
+              </span>
+            </div>
           </div>
-        </v-list-item>
+        </div>
       </v-list>
     </div>
     <v-divider></v-divider>

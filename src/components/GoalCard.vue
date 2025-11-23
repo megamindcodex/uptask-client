@@ -1,43 +1,29 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useNavigatorStore } from '@/stores/navigator'
 import { useCollectionStore } from '@/stores/collectionStore'
 import { useTaskStore } from '@/stores/taskStore'
-
+import TaskCompleteIcon from '@/assets/icons/TaskCompleteIcon.vue'
 import TrashIcon from '@/assets/icons/TrashIcon.vue'
 import EditIcon from '@/assets/icons/EditIcon.vue'
-import TaskCompleteIcon from '@/assets/icons/TaskCompleteIcon.vue'
+
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
 
 const { navigateTo } = useNavigatorStore()
-
 const { toggle_Edit_collection_dialog } = useCollectionStore()
 
-// props can also be assing to a variable incase it is meant to be used in the script or computed. like the mothod right below
-// defindProps(["goals"])
 const props = defineProps(['collection'])
-
 defineEmits(['displayDialog', 'toggleEditCollectionDialog'])
 
-const taskStore = useTaskStore()
-// const { tasks } = storeToRefs(taskStore)
-// const { get_all_task_in_collection } = useTaskStore()
+const timestamp = ref(props.collection.createdAt)
+const timeStampFormatted = dayjs(timestamp.value).format('HH:mm, MM/DD')
 
 const tasksCompleted = computed(() => {
   const tasks = props.collection.tasks || []
-
-  if (tasks.length === 0) {
-    return false
-  }
-
-  return tasks.every((tasks) => {
-    // console.log('tasks checked value:', tasks.tick)
-    return tasks.tick === true
-  })
-})
-
-onMounted(async () => {
-  // await get_all_task_in_collection(props.collection._id)
+  if (tasks.length === 0) return false
+  return tasks.every((task) => task.tick === true)
 })
 </script>
 
@@ -46,53 +32,65 @@ onMounted(async () => {
     <div id="col-1" @click="navigateTo(`/goals/${props.collection._id}`)">
       <span id="title">{{ props.collection.title }}</span>
       <span id="sub-title">{{ props.collection.description }}</span>
+
       <div class="d-flex align-center">
-        <span id="txt">Date: {{ props.collection.date }}</span>
+        <span id="timestamp-txt">{{ timeStampFormatted }}</span>
+
         <div v-if="tasksCompleted" class="w-100 d-flex align-center justify-center">
-          <span class="txt-complete pa-0">Completed</span>
+          <span class="txt-complete">Completed</span>
           <TaskCompleteIcon id="task-complete-icon" />
         </div>
       </div>
     </div>
-    <div id="col-2" class="">
+
+    <div id="col-2">
       <EditIcon id="edit-icon" @click="toggle_Edit_collection_dialog(props.collection, 'open')" />
       <TrashIcon id="trash-icon" @click="$emit('displayDialog')" />
     </div>
   </v-card>
 </template>
 
-<style lang="css" scoped>
+<style scoped>
+/* Card Container */
 .card {
-  position: relative;
-  border-radius: 0;
   width: 100%;
   display: flex;
-  gap: 5px;
-  /* flex-direction: column; */
   justify-content: space-between;
-  border: 1px solid #ffc93e;
-  transition: 0.3s ease-in-out;
-  padding: 0.5rem;
+  padding: 0.7rem;
+  border-radius: 10px;
+  border: 1px solid #0f8193;
+  /* background: #f1f7f8; */
+  transition: 0.25s ease-in-out;
 }
 
+/* Hover subtle lift + color pop */
+.card:hover {
+  border-color: #086977;
+  /* transform: translateY(-2px); */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+}
+
+/* Content Column */
 #col-1 {
   width: 100%;
   display: flex;
   gap: 5px;
   flex-direction: column;
-  /* border-bottom: 1px solid #000; */
+  cursor: pointer;
 }
+
 #col-1 span {
-  padding: 5px;
+  padding: 3px 0;
 }
 
 #title {
-  font-size: 1.2rem;
-  color: #2f4858;
+  max-width: 300px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #086977;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
 }
 
 #sub-title {
@@ -102,68 +100,55 @@ onMounted(async () => {
   text-overflow: ellipsis;
 }
 
+/* Right-side Column */
 #col-2 {
-  position: relative;
-  /* width: 100%; */
-  height: 100%;
   display: flex;
-  /* gap: 94px; */
   flex-direction: column;
-  align-items: center;
   justify-content: space-between;
-  background-color: #c7d4dd1a;
-}
-
-.card:hover {
-  color: #2f4858;
-  border: 1px solid #2f4858;
-}
-
-/* span {
-  font-size: 1rem;
-  color: #086977;
-  cursor: pointer;
-} */
-
-#trash-cont {
-  position: relative;
-  padding: 5px;
-  text-align: center;
-  display: flex;
   align-items: center;
-  justify-content: center;
+  padding-left: 10px;
+  /* border-left: 1px solid #0f8193; */
+  background: rgba(15, 129, 147, 0.08);
 }
 
+/* Icons */
 #edit-icon {
-  width: 20px;
-  height: 20px;
-  fill: #086977;
-  /* fill: currentColor; */
+  width: 22px;
+  height: 22px;
+  fill: #222121;
   cursor: pointer;
+  transition: 0.2s;
+}
+#edit-icon:hover {
+  /* transform: scale(1.15); */
 }
 
 #trash-icon {
-  position: relative;
-  width: 27px;
-  height: 27px;
-  fill: currentColor;
+  width: 25px;
+  height: 25px;
+  fill: #222121;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#trash-icon:hover {
+  /* transform: scale(1.2); */
 }
 
+/* Completed Tag */
 .txt-complete {
   font-size: 0.9rem;
-  color: green;
+  font-weight: 600;
+  color: #0a8f34;
 }
 
 #task-complete-icon {
-  position: relative;
   width: 20px;
   height: 20px;
-  fill: green;
-  /* stroke-width: 20px; */
+  fill: #0a8f34;
 }
 
-#del-dialog {
-  position: relative;
-  top: 150px;
+#timestamp-txt {
+  font-size: 12px;
+  color: #2f4858;
 }
 </style>

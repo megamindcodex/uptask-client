@@ -15,6 +15,8 @@ const { validate_password_field, validate_confirmPassowrd_field } = useValidator
 
 const alert = ref({ type: '', message: 'testing alert message' })
 
+const isLoading = ref(false)
+
 const formData = reactive({
   email: route.value.params.email,
   newPassword: '',
@@ -58,7 +60,9 @@ const submitForm = async () => {
 
   console.log(`form is valid: ${isFormValid}`)
 
+  isLoading.value = true
   const result = await reset_user_password(formData)
+  isLoading.value = false
   if (!result.success) {
     console.log(`${result.message}`)
     alert.value = { type: 'error', message: result.message }
@@ -136,7 +140,8 @@ const submitForm = async () => {
 
     <div class="btn-cont mt-4">
       <v-btn type="submit" variant="tonal" class="btn py-6" block>
-        <span>set New Password</span>
+        <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
+        <span v-if="!isLoading">set New Password</span>
       </v-btn>
     </div>
   </v-form>

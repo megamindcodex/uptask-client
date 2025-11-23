@@ -15,6 +15,8 @@ const { validate_email_field, validate_resetCode_field } = useValidator()
 
 const router = useRouter()
 
+const isLoading_verifycode = ref(false)
+const isLoading_resetcode = ref(false)
 const alert = ref({ type: '', message: '' })
 
 const email = ref('')
@@ -44,7 +46,9 @@ const run_requestResetCode = async () => {
     return
   }
 
+  isLoading_resetcode.value = true
   const result = await request_resetCode(email.value)
+  isLoading_resetcode.value = false
 
   if (!result.success) {
     alert.value = { type: 'error', message: result.message }
@@ -71,7 +75,9 @@ const run_verifyResetCode = async () => {
     return
   }
 
+  isLoading_verifycode.value = true
   const result = await verify_resetCode(email.value, resetCode.value)
+  isLoading_verifycode.value = false
 
   if (!result.success) {
     alert.value = { type: 'error', message: result.message }
@@ -130,7 +136,8 @@ const run_verifyResetCode = async () => {
     <div class="row w-100 d-flex justify-center align-center mb-4">
       <div class="btn-cont">
         <v-btn variant="tonal" class="btn py-6" @click="run_requestResetCode()" block>
-          <span>request reset code</span>
+          <v-progress-circular v-if="isLoading_resetcode" indeterminate></v-progress-circular>
+          <span v-if="!isLoading_resetcode">request reset code</span>
         </v-btn>
       </div>
       <!-- <div class="">
@@ -167,7 +174,8 @@ const run_verifyResetCode = async () => {
       </div>
       <div class="btn-cont">
         <v-btn variant="tonal" class="btn py-6" @click="run_verifyResetCode()" block>
-          <span>verify code</span>
+          <v-progress-circular v-if="isLoading_verifycode" indeterminate></v-progress-circular>
+          <span v-if="!isLoading_verifycode">verify code</span>
         </v-btn>
       </div>
     </div>

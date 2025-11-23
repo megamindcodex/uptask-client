@@ -2,6 +2,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useValidator } from '@/composables/useValidator'
+import { useAlertStore } from '@/stores/alertStore'
 import { useUserStore } from '@/stores/userStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { useRoute } from 'vuetify/lib/composables/router'
@@ -12,12 +13,15 @@ import CancelIcon from '@/assets/icons/CancelIcon.vue'
 const route = useRoute()
 const goalId = ref(route.value.params.id)
 
+const { toggle_alert } = useAlertStore()
+
 const { toggle_add_task_dialog, add_new_task, get_all_task_in_collection } = useTaskStore()
 
 defineEmits(['showTaskDialog'])
 
 // const { validate_goal_title_field, validate_goal_description_field } = useValidator()
 
+const isLoading = ref(false)
 const formData = reactive({
   content: '',
   note: null,
@@ -43,7 +47,6 @@ const validateField = (field) => {
 
 const validateForm = () => {
   validateField('content')
-
   return contentFieldeValidator.value.valid
 }
 
@@ -56,14 +59,17 @@ const run_add_new_task = async () => {
 
   console.log(`form valid is ${isFormValid}`)
 
+  isLoading.value = true
   const result = await add_new_task(formData)
+  isLoading.value = false
   if (!result.success) {
+    toggle_alert({ type: 'error', text: result.message })
     console.log(result.message)
     return
   }
 
   console.log(result.message)
-
+  toggle_alert({ type: 'success', text: 'New task added!' })
   await get_all_task_in_collection(goalId.value)
   toggle_add_task_dialog()
   return
@@ -122,9 +128,10 @@ const run_add_new_task = async () => {
     </div>
 
     <div class="w-100 btn d-flex ga-5 flex-column justify-space-around">
-      <v-btn type="submit" id="add-btn" class="rounded-md py-5" variant="tonal" block
-        ><span>Add</span></v-btn
-      >
+      <v-btn type="submit" id="add-btn" class="rounded-md py-5" variant="tonal" block>
+        <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
+        <span v-if="!isLoading">Add</span>
+      </v-btn>
       <v-btn
         @click.prevent.stop="toggle_add_task_dialog()"
         class="rounded-md py-5"

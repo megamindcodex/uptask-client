@@ -13,10 +13,19 @@ export const useCollectionStore = defineStore("collectionStore", () => {
 
 
     const taskCollections = ref([])
+    // const totalCollection = ref(0)
+    // const totalCollectionCompleted = ref(0)
     const collectionCreateDialog = ref(false)
     const collectionEditDisplay = ref(false)
     const collectionToEdit = ref({})
     // const collectionId = ref(null)
+
+    // const totalCollection = computed(() => {
+    //     // safely handle cases where userData or taskCollections may be undefined
+    //     return taskCollections.value?.length ?? 0
+    // })
+
+
 
 
 
@@ -153,13 +162,20 @@ export const useCollectionStore = defineStore("collectionStore", () => {
             // taskCollections.value = res.data.taskCollections
             // return { success: true, message: res.data.message }
 
-            await get_user_data()
+            const result = await get_user_data()
+            if (!result.success) {
+                throw new Error(result.message || "Something went wrong!")
+            }
+
             taskCollections.value = userData.value.taskCollections
+
+            // totalCollection.value = userData.value.taskCollections.length
 
             return { success: false, message: "get all task collection successfull", data: taskCollections.value }
 
         } catch (err) {
-            const msg = err.response.data.message || err.message || "Unkown get_all_task_collection error"
+            const msg = err.response?.data?.message || err?.message || "Unkown get_all_task_collection error"
+            console.log(msg)
             return { success: false, message: msg }
         }
     }
@@ -201,6 +217,8 @@ export const useCollectionStore = defineStore("collectionStore", () => {
 
     return {
         taskCollections,
+        // totalCollection,
+        // totalCollectionCompleted,
         collectionCreateDialog,
         collectionEditDisplay,
         collectionToEdit,
