@@ -7,7 +7,7 @@ import { useCollectionStore } from './stores/collectionStore'
 import { useTaskStore } from './stores/taskStore'
 import { useAlertStore } from './stores/alertStore'
 
-import NavBar from './components/NavBar.vue'
+import NavBar from '@/components/NavBar.vue'
 import FooterComp from './components/FooterComp.vue'
 import HeaderBar from './components/HeaderBar.vue'
 import Alert from './components/Alert.vue'
