@@ -109,7 +109,7 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   /* background-color: green; */
-  margin-top: 100px;
+  margin-top: 80px;
 }
 
 .slide-enter-active {

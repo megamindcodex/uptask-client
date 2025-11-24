@@ -1,8 +1,8 @@
 
 <template>
-  <div class="about-page">
+  <div id="about-page">
     <!-- Header -->
-    <section class="about-hero">
+    <section id="about-hero">
       <h1>About This App</h1>
       <p>Your goals deserve more than a forgotten checklist.</p>
     </section>
@@ -64,7 +64,7 @@
 </script>
 
 <style scoped>
-.about-page {
+#about-page {
   width: 100%;
   background: #f9f9f9;
   padding-bottom: 3rem;
@@ -73,7 +73,7 @@
 }
 
 /* Hero */
-.about-hero {
+#about-hero {
   text-align: center;
   padding: 4rem 10%;
   background: linear-gradient(135deg, #0f8193, #fece51);
@@ -81,12 +81,12 @@
   color: #fff;
 }
 
-.about-hero h1 {
+#about-hero h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
 }
 
-.about-hero p {
+#about-hero p {
   font-size: 1.2rem;
 }
 
