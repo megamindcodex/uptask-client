@@ -22,14 +22,13 @@ const { hide_alert } = useAlertStore()
 <style lang="css" scoped>
 div {
   font-size: 17px;
+  font-weight: bold;
   width: auto;
-  min-width: 200px;
-  max-width: 300px;
   display: flex;
-  /* gap: 10px; */
+  gap: 1rem;
   /* flex-direction: column; */
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   border-radius: 10px;
   padding: 5px;
 }

@@ -60,7 +60,7 @@ const navOptions = ref([
 
 onMounted(async () => {
   await checkIfAuthenticated()
-  console.log(isAuthenticated.value)
+  // console.log(isAuthenticated.value)
 })
 </script>
 

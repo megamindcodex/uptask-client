@@ -163,6 +163,7 @@ export const useCollectionStore = defineStore("collectionStore", () => {
             // return { success: true, message: res.data.message }
 
             const result = await get_user_data()
+            console.log(result.success)
             if (!result.success) {
                 throw new Error(result.message || "Something went wrong!")
             }
@@ -171,7 +172,7 @@ export const useCollectionStore = defineStore("collectionStore", () => {
 
             // totalCollection.value = userData.value.taskCollections.length
 
-            return { success: false, message: "get all task collection successfull", data: taskCollections.value }
+            return { success: true, message: "get all task collection successfull", data: taskCollections.value }
 
         } catch (err) {
             const msg = err.response?.data?.message || err?.message || "Unkown get_all_task_collection error"

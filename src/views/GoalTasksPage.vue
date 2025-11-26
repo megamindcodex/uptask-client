@@ -20,6 +20,8 @@ import EditIcon from '@/assets/icons/EditIcon.vue'
 import TrashIcon from '@/assets/icons/TrashIcon.vue'
 import CancelIcon from '@/assets/icons/CancelIcon.vue'
 import TickIcon from '@/assets/icons/TickIcon.vue'
+import ErrorIcon from '@/assets/icons/ErrorIcon.vue'
+import ReloadIcon from '@/assets/icons/ReloadIcon.vue'
 
 const route = useRoute()
 const collectionId = ref(route.value.params.id)
@@ -54,7 +56,10 @@ const {
 
 const isLoadingDelete = ref(false)
 const isLoadingcheckTask = ref(false)
+const isContentLoading = ref(false)
+const contentError = ref(false)
 
+// run delete task function
 const run_delet_task = async () => {
   isLoadingDelete.value = true
   const result = await delete_task(taskToBeDeletedId.value, collectionId.value)
@@ -74,6 +79,7 @@ const run_delet_task = async () => {
   return
 }
 
+//run Toggle toggle task tick function
 const run_toggle_task_tick = async (taskId) => {
   isLoadingcheckTask.value = true
   const result = await toggle_task_tick(taskId, collectionId.value)
@@ -85,14 +91,37 @@ const run_toggle_task_tick = async (taskId) => {
     return
   }
 
-  toggle_alert({ type: 'info', text: 'Checked' })
+  toggle_alert({ type: 'info', text: 'updated' })
   await get_all_task_in_collection(collectionId.value)
   selectTask()
   console.log(result.message)
   return
 }
+
+// reload get all task in collection function
+const reload_get_all_task_in_collection_function = async () => {
+  contentError.value = false
+  isContentLoading.value = true
+  const result = await get_all_task_in_collection(collectionId.value)
+  isContentLoading.value = false
+
+  if (!result.success) {
+    contentError.value = true
+    return
+  }
+
+  return
+}
 onMounted(async () => {
-  await get_all_task_in_collection(collectionId.value)
+  isContentLoading.value = true
+  const result = await get_all_task_in_collection(collectionId.value)
+  isContentLoading.value = false
+
+  if (!result.success) {
+    contentError.value = true
+    return
+  }
+
   // console.log(goalTitle.value)
   // console.log(tasks.value)
 })
@@ -100,7 +129,7 @@ onMounted(async () => {
 <template>
   <div id="cont">
     <!-- Sub Header for goal title and goal description -->
-    <div id="sub-head" class="px-2">
+    <div v-if="!isContentLoading" id="sub-head" class="px-2">
       <div id="goal-title">
         <span class="">{{ goalTitle }}</span>
       </div>
@@ -108,84 +137,138 @@ onMounted(async () => {
         <p class="text-subtitle">{{ goalDescription }}</p>
       </div>
     </div>
-    <div v-if="tasks.length" class="wrapper px-2">
-      <div class="task-item" v-for="task in tasks" :key="task._id">
-        <TickIcon id="tick-icon" v-show="task.tick && task._id !== selectedTask" />
-        <div id="row-1">
-          <div id="content" class="text-subtitle-1 font-weight-bold">{{ task.content }}</div>
-          <DotMenuIcon
-            id="dot-option-icon"
-            v-if="selectedTask !== task._id"
-            @click="selectTask(task._id)"
-          />
-          <!-- <ChevronLeftIcone
+    <div v-if="!isContentLoading" id="wrapper">
+      <div id="task-item-wrapper" class="px-2">
+        <div class="task-item" v-for="task in tasks" :key="task._id">
+          <TickIcon id="tick-icon" v-show="task.tick && task._id !== selectedTask" />
+          <div id="row-1">
+            <div id="content" class="text-subtitle-1 font-weight-bold">{{ task.content }}</div>
+            <DotMenuIcon
+              id="dot-option-icon"
+              v-if="selectedTask !== task._id"
+              @click="selectTask(task._id)"
+            />
+            <!-- <ChevronLeftIcone
             id="chevronLeft-icon"
             v-if="selected !== task._id"
             @click="selectTask(task._id)"
           /> -->
-          <!-- <ArrowLeftIcon
+            <!-- <ArrowLeftIcon
             id="ArrowLeft-icon"
             v-if="selected !== task._id"
             @click="selectTask(task._id)"
           /> -->
-        </div>
-        <transition name="grow-fade">
-          <div id="row-2" v-show="task._id === selectedTask">
-            <v-progress-circular
-              v-if="isLoadingcheckTask"
-              size="25"
-              color="green"
-              indeterminate
-            ></v-progress-circular>
-            <span id="check-btn" v-if="!task.tick && !isLoadingcheckTask">
-              <!-- this shows when the an individual task is unchecked -->
-              <CompleteIcon
-                id="complete-icon"
-                class="complete-icon"
-                @click="run_toggle_task_tick(task._id)"
-              />
-            </span>
-            <span id="check-solid-btn" v-if="task.tick && !isLoadingcheckTask">
-              <!-- this shows when the an individual task is checked -->
-              <SolidCompleteIcon
-                id="solid-complete-icon"
-                class="solid-complete-icon"
-                @click="run_toggle_task_tick(task._id)"
-              />
-            </span>
-            <span
-              id="edit-btn"
-              v-ripple="{ class: 'text-black' }"
-              @click="toggle_edit_task_dialog((type = 'open'), task)"
-            >
-              <EditIcon id="edit-icon" />
-            </span>
-            <span
-              id="delete-btn"
-              v-ripple="{ class: 'text-black' }"
-              @click="toggle_task_delete_dialog((type = 'open'), task._id, collectionId)"
-            >
-              <TrashIcon id="trash-icon" />
-            </span>
-            <span id="chevronRight-btn" v-ripple="{ class: 'text-black' }" @click="selectTask()">
-              <!-- <CancelIcon id="cancel-icon" /> -->
-              <ChevronRightIcon id="chevronRight-icon" />
-            </span>
           </div>
-        </transition>
+          <transition name="grow-fade">
+            <div id="row-2" v-show="task._id === selectedTask">
+              <v-progress-circular
+                v-if="isLoadingcheckTask"
+                size="25"
+                color="green"
+                indeterminate
+              ></v-progress-circular>
+              <span id="check-btn" v-if="!task.tick && !isLoadingcheckTask">
+                <!-- this shows when the an individual task is unchecked -->
+                <CompleteIcon
+                  id="complete-icon"
+                  class="complete-icon"
+                  @click="run_toggle_task_tick(task._id)"
+                />
+              </span>
+              <span id="check-solid-btn" v-if="task.tick && !isLoadingcheckTask">
+                <!-- this shows when the an individual task is checked -->
+                <SolidCompleteIcon
+                  id="solid-complete-icon"
+                  class="solid-complete-icon"
+                  @click="run_toggle_task_tick(task._id)"
+                />
+              </span>
+              <span
+                id="edit-btn"
+                v-ripple="{ class: 'text-black' }"
+                @click="toggle_edit_task_dialog((type = 'open'), task)"
+              >
+                <EditIcon id="edit-icon" />
+              </span>
+              <span
+                id="delete-btn"
+                v-ripple="{ class: 'text-black' }"
+                @click="toggle_task_delete_dialog((type = 'open'), task._id, collectionId)"
+              >
+                <TrashIcon id="trash-icon" />
+              </span>
+              <span id="chevronRight-btn" v-ripple="{ class: 'text-black' }" @click="selectTask()">
+                <!-- <CancelIcon id="cancel-icon" /> -->
+                <ChevronRightIcon id="chevronRight-icon" />
+              </span>
+            </div>
+          </transition>
+        </div>
+      </div>
+
+      <!-- Add new Task -->
+      <div class="pa-4">
+        <div
+          v-if="tasks?.length < 1 && contentError !== true"
+          id="add-box"
+          @click="toggle_add_task_dialog()"
+          v-ripple="{ class: 'text-teal' }"
+          class="w-100 d-flex flex-column align-center justify-self-center"
+        >
+          <AddFileIcon class="add-icon" />
+          <span>Click to add task to this goal</span>
+        </div>
       </div>
     </div>
-    <div
-      v-else
-      class="w-100 d-flex flex-column align-center justify-center ga-4"
-      @click="toggle_add_task_dialog()"
-      v-ripple="{ class: 'text-teal' }"
-    >
-      <div id="add-box" class="d-flex flex-column align-center justify-self-center">
-        <AddFileIcon class="add-icon" />
-        <span>Click to add task to this goal</span>
-      </div>
+
+    <!-- Loader Components -->
+    <div id="loader" v-if="isContentLoading">
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
+      <v-skeleton-loader :loading="isContentLoading" type="list-item" class="loader-item">
+        <!-- <v-list-item lines="three" subtitle="Subtitle" title="Title"></v-list-item> -->
+      </v-skeleton-loader>
     </div>
+
+    <!-- Content Error -->
+    <v-card id="content-error" v-if="contentError" variant="flat">
+      <ErrorIcon id="error-icon" />
+      <span>Somthing went wrong. please try again, or reload the page</span>
+      <span class="d-flex align-center ga-2">
+        Reload<ReloadIcon id="reload-icon" @click="reload_get_all_task_in_collection_function()"
+      /></span>
+    </v-card>
   </div>
 
   <!--Dailog for adding new task in user task collection -->
@@ -215,7 +298,7 @@ onMounted(async () => {
 
   <!-- Delete Collection -->
   <v-dialog persistent id="delete-task-dialog" v-model="taskDeleteDialog">
-    <v-card id="del-dialog" class="card w-100 pa-4 ga-4 rounded-xl">
+    <v-card id="del-card" class="card w-100 pa-4 ga-4 rounded-xl">
       <div class="w-100 d-flex flex-column align-center justify-center">
         <v-card-title>Delete this task?</v-card-title>
       </div>
@@ -242,7 +325,7 @@ onMounted(async () => {
   gap: 1rem;
   flex-direction: column;
   /* justify-content: center; */
-  /* align-items: center; */
+  align-items: center;
   margin: 5px;
   /* border: 1px solid blue; */
 }
@@ -252,7 +335,7 @@ onMounted(async () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  /* justify-content: center; */
+  justify-content: center;
   align-items: center;
   color: #2f4858;
   text-transform: capitalize;
@@ -281,7 +364,14 @@ onMounted(async () => {
   color: #2f4858;
 }
 
-.wrapper {
+#wrapper {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#task-item-wrapper {
   position: relative;
   width: 100%;
   height: 100%;
@@ -399,22 +489,31 @@ onMounted(async () => {
 }
 
 #add-box {
+  width: 100%;
+  height: auto;
+  padding: 0.5rem 0px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 2px dashed #9eb9c6;
+  color: #2f4858;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 80%;
-  height: 100%;
-  padding: 1rem;
-  background-color: #cdedf2;
-  border-style: dashed;
-  border-color: #086977;
+  transition: 0.3s ease-in-out;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(20, 25, 38, 0.05);
+}
+
+#add-box:hover {
+  border-color: #2f4858;
+  background: #f7fafc;
+  /* transform: translateY(-2px); */
 }
 
 .add-icon {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   fill: #086977;
 }
 
@@ -432,6 +531,51 @@ onMounted(async () => {
   height: 20px;
   /* fill: #086977; */
   fill: currentColor;
+}
+
+#loader {
+  width: 100%;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+}
+
+.loder-item {
+  width: 100%;
+}
+
+#content-error {
+  width: 100%;
+  max-width: 300px;
+  height: 250px;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0px 0.5rem;
+  border: 1px solid #fca7a7;
+  border-radius: 12px;
+}
+
+#error-icon {
+  width: 60px;
+  height: 60px;
+  fill: red;
+}
+
+#reload-icon {
+  width: 40px;
+  height: 40px;
+  fill: #2f4858;
+  transition: 0.2s ease;
+}
+
+#reload-icon:hover {
+  fill: #2594f6;
+  scale: 1.1;
+  transition: 0.2s ease;
 }
 
 .complete-icon {
@@ -470,7 +614,7 @@ onMounted(async () => {
   height: 26px;
 }
 
-#del-dialog {
+#del-card {
   position: relative;
   top: 150px;
 }

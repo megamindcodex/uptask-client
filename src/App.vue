@@ -48,7 +48,6 @@ const toggleNav = () => {
 
 onMounted(async () => {
   get_user_data()
-
   // console.log(userData.value)
 })
 </script>

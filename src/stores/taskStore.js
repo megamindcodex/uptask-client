@@ -80,11 +80,14 @@ export const useTaskStore = defineStore("taskStore", () => {
             taskToBeDeletedId.value = taskId
             taskDeleteDialog.value = true
 
-            console.log("taskToBeDeletedIds is: ", taskToBeDeletedId.value)
+            // console.log("taskToBeDeletedIds is: ", taskToBeDeletedId.value)
 
             return
         }
+        taskToBeDeletedId.value = null
         taskDeleteDialog.value = !taskDeleteDialog.value
+        selectTask()
+        return
         // console.log(`delete dialog is: ${taskDeleteDialog.value}`)
     }
 

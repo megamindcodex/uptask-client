@@ -149,6 +149,7 @@ const tasksCompleted = computed(() => {
 
 #timestamp-txt {
   font-size: 12px;
+  white-space: nowrap;
   color: #2f4858;
 }
 </style>
