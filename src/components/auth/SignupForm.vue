@@ -9,10 +9,15 @@ import { useUserStore } from '@/stores/userStore'
 
 import { useAlertStore } from '@/stores/alertStore'
 
+import EyeIcon from '@/assets/icons/EyeIcon.vue'
+import EyecancleIcon from '@/assets/icons/EyecancleIcon.vue'
+
 const { toggle_alert } = useAlertStore()
 
 const router = useRouter()
 const userStore = useUserStore()
+// password visibility
+const visible = ref(false)
 
 // StoreToRefs here is used to be able to destructore state from the store because disctructuring directly will make the state not reactive
 const { userData } = storeToRefs(userStore)
@@ -167,7 +172,7 @@ const submitForm = async () => {
 
     <!-- passwrord Field -->
     <div class="form-group">
-      <div class="input-field">
+      <div class="input-field" id="password-field">
         <label for="password">password</label>
         <input
           type="password"
@@ -177,6 +182,8 @@ const submitForm = async () => {
           v-model="formData.password"
           @blur="validateField('password')"
         />
+        <EyeIcon v-if="visible" class="eye-icon" @click="visible = !visible" />
+        <EyecancleIcon v-if="!visible" class="eye-icon" @click="visible = !visible" />
       </div>
       <div class="input-details">
         <Transition name="input-error-fade">
@@ -187,7 +194,7 @@ const submitForm = async () => {
 
     <!-- confirm password Field -->
     <div class="form-group">
-      <div class="input-field">
+      <div class="input-field" id="password-field">
         <label for="confrim-password">Confirm-password</label>
         <input
           type="password"
@@ -197,6 +204,8 @@ const submitForm = async () => {
           v-model="confirmPassword"
           @blur="validateField('confirm-password')"
         />
+        <EyeIcon v-if="visible" class="eye-icon" @click="visible = !visible" />
+        <EyecancleIcon v-if="!visible" class="eye-icon" @click="visible = !visible" />
       </div>
       <div class="input-details">
         <Transition name="input-error-fade">
@@ -276,6 +285,19 @@ const submitForm = async () => {
   padding: 10px;
   outline: none;
   border: 2px solid #8c8989;
+}
+
+#password-field {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 8px;
+  top: 34px;
+  fill: #464545;
+  width: 30px;
+  height: 30px;
 }
 
 .input-field input:focus {

@@ -8,6 +8,9 @@ import { useAuthStore } from '@/stores/AuthStore'
 import { useValidator } from '@/composables/useValidator' //custom form validator composables
 import { useAlertStore } from '@/stores/alertStore'
 
+import EyeIcon from '@/assets/icons/EyeIcon.vue'
+import EyecancleIcon from '@/assets/icons/EyecancleIcon.vue'
+
 const { checkAuth } = useAuthStore()
 
 const { toggle_alert } = useAlertStore()
@@ -18,6 +21,9 @@ const { validate_email_field, validate_password_field } = useValidator()
 
 const userStore = useUserStore()
 const { loginUser } = useUserStore()
+
+// password visibility
+const visible = ref(false)
 
 const isLoading = ref(false)
 const alert = ref({ type: '', message: '' })
@@ -117,16 +123,18 @@ const submitForm = async () => {
 
     <!-- passwrord Field -->
     <div class="form-group">
-      <div class="input-field">
+      <div class="input-field" id="password-field">
         <label for="password">password</label>
         <input
-          type="password"
+          :type="visible ? 'text' : 'password'"
           id="password"
           placeholder="enter your password"
           class="rounded-lg"
           v-model="formData.password"
           @blur="validateField('password')"
         />
+        <EyeIcon v-if="visible" class="eye-icon" @click="visible = !visible" />
+        <EyecancleIcon v-if="!visible" class="eye-icon" @click="visible = !visible" />
       </div>
       <div class="input-details">
         <Transition name="input-error-fade">
@@ -207,6 +215,19 @@ const submitForm = async () => {
   padding: 10px;
   outline: none;
   border: 2px solid #8c8989;
+}
+
+#password-field {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 8px;
+  top: 34px;
+  fill: #464545;
+  width: 30px;
+  height: 30px;
 }
 
 .input-field input:focus {

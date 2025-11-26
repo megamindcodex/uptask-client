@@ -18,9 +18,9 @@ export const useAlertStore = defineStore("useStore", () => {
         // console.log(alertDisplay.value)
 
 
-        // setTimeout(() => {
-        //     hide_alert()
-        // }, 4000)
+        setTimeout(() => {
+            hide_alert()
+        }, 4000)
     }
 
     const hide_alert = () => {
